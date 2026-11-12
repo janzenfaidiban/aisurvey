@@ -8,7 +8,7 @@
    Ganti SCRIPT_URL dengan URL Web App dari Google Apps Script
    (lihat README.md, langkah 3).
    ========================================================= */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz6_TFDSpaJGTLrT-ZxWuW330swpkXu9R1EtQ2ZhgSfRBekXM2qoZysI75bqkilQVio/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx41IwlpLlLbDE7SMimpGuVjFpgs9yI4KD-KvUBh9rtxAVwBGSOUUhZKc8JrI6Nk0LT/exec";
 
 // AKfycbz6_TFDSpaJGTLrT-ZxWuW330swpkXu9R1EtQ2ZhgSfRBekXM2qoZysI75bqkilQVio
 
