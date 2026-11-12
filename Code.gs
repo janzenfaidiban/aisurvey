@@ -8,6 +8,12 @@
 const SPREADSHEET_ID = '1cRjo19_Xqm62ndoRoX4hPINc4VUNRElIO2XyM47ekb0';
 const SHEET_NAME = 'Jawaban';
 
+// Isi dengan kata sandi bebas jika laporan hasil.html tidak boleh dibuka umum.
+// Lalu buka laporan dengan alamat: hasil.html?kunci=KATA_SANDI
+const KUNCI_HASIL = '';
+// Lama data laporan disimpan di cache (detik) agar spreadsheet tidak dibaca terus-menerus.
+const CACHE_DETIK = 300;
+
 // [kunci dari form, judul kolom di spreadsheet]
 const COLUMNS = [
   ['timestamp', 'Waktu Kirim'],
@@ -64,9 +70,49 @@ function doPost(e) {
   }
 }
 
-// Buka URL Web App di browser untuk memastikan skrip aktif
-function doGet() {
+// GET tanpa parameter  : cek apakah skrip aktif.
+// GET ?aksi=hasil      : data jawaban untuk hasil.html (sudah dianonimkan).
+function doGet(e) {
+  const p = (e && e.parameter) || {};
+  if (p.aksi === 'hasil') return hasil_(p);
   return json_({ ok: true, pesan: 'Penerima survei aktif.' });
+}
+
+/**
+ * Mengirim semua jawaban dalam bentuk ringkas untuk halaman laporan.
+ * Demi privasi: waktu kirim dipotong menjadi tanggal, isian bebas
+ * "Lainnya: ..." hanya disimpan sebagai "Lainnya", dan cerita pertanyaan 29
+ * hanya ditandai 1 (diisi) atau 0 (kosong). Isi teksnya tidak pernah dikirim.
+ */
+function hasil_(p) {
+  if (KUNCI_HASIL && p.kunci !== KUNCI_HASIL) {
+    return json_({ ok: false, error: 'Kunci akses laporan salah atau belum diisi.' });
+  }
+  const cache = CacheService.getScriptCache();
+  const cached = cache.get('hasil');
+  if (cached) return text_(cached);
+
+  const sheet = getSheet_();
+  const keys = COLUMNS.map(c => c[0]);
+  const last = sheet.getLastRow();
+  const tz = Session.getScriptTimeZone();
+  let rows = [];
+  if (last > 1) {
+    rows = sheet.getRange(2, 1, last - 1, COLUMNS.length).getValues().map(r => keys.map((k, i) => {
+      const v = r[i];
+      if (k === 'timestamp') return v instanceof Date ? Utilities.formatDate(v, tz, 'yyyy-MM-dd') : String(v).slice(0, 10);
+      if (k === 'q29') return String(v).trim() && v !== '(dilewati)' ? 1 : 0;
+      return anonim_(String(v));
+    }));
+  }
+  const out = JSON.stringify({ ok: true, diperbarui: new Date().toISOString(), kolom: keys, baris: rows });
+  try { cache.put('hasil', out, CACHE_DETIK); } catch (_) { /* data terlalu besar untuk cache, abaikan */ }
+  return text_(out);
+}
+
+// "Lainnya: Merauke" -> "Lainnya"; "Kabupaten lain di Papua: Biak" -> "Kabupaten lain di Papua"
+function anonim_(s) {
+  return s.split('; ').map(x => x.replace(/^(Lainnya|Kabupaten lain di Papua):.*$/, '$1')).join('; ');
 }
 
 // Jalankan sekali dari editor (opsional) untuk membuat sheet dan judul kolom
@@ -97,4 +143,8 @@ function clean_(v) {
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function text_(s) {
+  return ContentService.createTextOutput(s).setMimeType(ContentService.MimeType.JSON);
 }

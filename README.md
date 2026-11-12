@@ -1,11 +1,15 @@
 # Survei Teknologi & AI di Jayapura/Papua
 
-Form survei statis untuk GitHub Pages. Setiap jawaban disimpan ke Google Spreadsheet melalui Google Apps Script.
+Form survei statis untuk GitHub Pages. Setiap jawaban disimpan ke Google Spreadsheet melalui Google Apps Script, lalu ditampilkan sebagai laporan analisa dan diagram di `hasil.html`.
+
+- **Form survei:** https://janzenfaidiban.github.io/aisurvey/
+- **Laporan hasil:** https://janzenfaidiban.github.io/aisurvey/hasil.html (data contoh: [`hasil.html?demo=1`](https://janzenfaidiban.github.io/aisurvey/hasil.html?demo=1))
 
 **File:**
 - `index.html`: halaman form yang dipasang di GitHub Pages.
-- `Code.gs`: skrip penerima jawaban yang dipasang di Google Apps Script.
-
+- `hasil.html`: halaman laporan hasil survei (ringkasan temuan, diagram per pertanyaan, analisa silang, filter, cetak PDF, unduh CSV).
+- `pertanyaan.js`: daftar pertanyaan dan `SCRIPT_URL`, dipakai bersama oleh `index.html` dan `hasil.html`.
+- `Code.gs`: skrip penerima jawaban (dan penyedia data laporan) yang dipasang di Google Apps Script.
 ## 1. Pasang skrip di spreadsheet
 
 1. Buka spreadsheet: https://docs.google.com/spreadsheets/d/1cRjo19_Xqm62ndoRoX4hPINc4VUNRElIO2XyM47ekb0/edit
@@ -25,7 +29,7 @@ Form survei statis untuk GitHub Pages. Setiap jawaban disimpan ke Google Spreads
 
 ## 3. Hubungkan form
 
-Buka `index.html` dan ganti baris berikut dengan URL dari langkah 2:
+Buka `pertanyaan.js` dan ganti baris berikut dengan URL dari langkah 2:
 
 ```js
 const SCRIPT_URL = "PASTE_URL_WEB_APP_DI_SINI";
@@ -33,17 +37,31 @@ const SCRIPT_URL = "PASTE_URL_WEB_APP_DI_SINI";
 
 ## 4. Terbitkan di GitHub Pages
 
-1. Buat repositori baru di GitHub, misalnya `survei-ai-papua`, lalu unggah `index.html`.
+1. Repositori: https://github.com/janzenfaidiban/aisurvey. Pastikan `index.html`, `hasil.html`, dan `pertanyaan.js` ikut diunggah (push ke branch `main`).
 2. Buka **Settings → Pages**, pilih **Deploy from a branch**, branch `main`, folder `/ (root)`, lalu **Save**.
-3. Setelah 1–2 menit, form bisa diakses di `https://<username>.github.io/survei-ai-papua/`.
+3. Setelah 1–2 menit, form bisa diakses di https://janzenfaidiban.github.io/aisurvey/
+
+## Halaman hasil (laporan)
+
+Buka https://janzenfaidiban.github.io/aisurvey/hasil.html. Isinya:
+
+- Angka utama (jumlah responden, % pengguna AI, dan lainnya) beserta **ringkasan temuan** yang ditulis otomatis dari data.
+- Tren jumlah jawaban per hari dan perbandingan saluran penyebaran (`?src=`).
+- **Analisa silang**: penggunaan AI menurut usia dan pekerjaan, kualitas internet menurut domisili, kebiasaan memeriksa jawaban AI menurut usia.
+- Diagram untuk setiap pertanyaan. Pertanyaan setuju/tidak setuju dan skala kualitas memakai diagram divergen, sedangkan pertanyaan lain memakai diagram batang. Setiap diagram dilengkapi tabel angka.
+- Filter menurut usia, jenis kelamin, domisili, pekerjaan, dan sumber tautan. Tersedia juga tombol **Cetak / simpan PDF** dan **Unduh rekap (CSV)**.
+
+Agar halaman ini bisa membaca data, `Code.gs` versi terbaru harus diterapkan sebagai **versi baru** (lihat catatan di langkah 2). Untuk melihat tampilan laporan dengan data acak, buka `hasil.html?demo=1`.
+
+**Privasi:** Web App hanya mengirim tanggal (bukan jam), pilihan jawaban, dan tanda apakah pertanyaan 29 diisi. Isian bebas "Lainnya: …" dan cerita responden tidak pernah dikirim ke halaman laporan. Jika laporan tidak boleh dibuka umum, isi `KUNCI_HASIL` di `Code.gs` dengan kata sandi, lalu buka laporan dengan `hasil.html?kunci=KATA_SANDI`. Data laporan di-cache selama 5 menit (`CACHE_DETIK`).
 
 ## Melacak saluran penyebaran
 
 Tambahkan `?src=...` di akhir tautan untuk mencatat dari mana responden datang. Nilainya akan masuk ke kolom **Sumber Tautan**. Contoh:
 
-- `.../survei-ai-papua/?src=wa-uncen`
-- `.../survei-ai-papua/?src=umkm`
-- `.../survei-ai-papua/?src=gereja`
+- `https://janzenfaidiban.github.io/aisurvey/?src=wa-uncen`
+- `https://janzenfaidiban.github.io/aisurvey/?src=umkm`
+- `https://janzenfaidiban.github.io/aisurvey/?src=gereja`
 
 ## Catatan
 

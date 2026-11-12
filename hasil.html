@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hasil Survei AI Papua</title>
+<meta name="description" content="Laporan analisa dan diagram hasil Survei Teknologi & AI di Jayapura/Papua.">
+<meta name="robots" content="noindex">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f6f3ee;
+    --card: #ffffff;
+    --ink: #1f2a2e;
+    --muted: #5d6b70;
+    --line: #e2ddd4;
+    --grid: #ece8e1;
+    --accent: #0f6b5c;
+    --accent-soft: #e3f1ee;
+    --warm: #b5651d;
+    --error: #b42318;
+    --warn-bg: #fffaf2;
+    --warn-line: #ecd9bd;
+    --track: #f1eee8;
+    --bar: #0f6b5c;
+    /* skala divergen: merah = tidak setuju/buruk, abu = netral, biru = setuju/baik */
+    --neg2: #c4383c;
+    --neg1: #eb9a94;
+    --neu:  #cfccc4;
+    --pos1: #86b6ef;
+    --pos2: #256abf;
+    --other: #a29f97;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #12181a; --card: #1b2326; --ink: #e9eeee; --muted: #a3b0b3; --line: #2c373a; --grid: #263033;
+      --accent: #4fb8a3; --accent-soft: #183632; --warm: #e0954f; --error: #f07167;
+      --warn-bg: #2a2418; --warn-line: #4d4027; --track: #242e31; --bar: #3fae99;
+      --neg2: #e06363; --neg1: #8f4a48; --neu: #5a5a55; --pos1: #2f5f9a; --pos2: #5598e7; --other: #77756f;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #12181a; --card: #1b2326; --ink: #e9eeee; --muted: #a3b0b3; --line: #2c373a; --grid: #263033;
+    --accent: #4fb8a3; --accent-soft: #183632; --warm: #e0954f; --error: #f07167;
+    --warn-bg: #2a2418; --warn-line: #4d4027; --track: #242e31; --bar: #3fae99;
+    --neg2: #e06363; --neg1: #8f4a48; --neu: #5a5a55; --pos1: #2f5f9a; --pos2: #5598e7; --other: #77756f;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg); color: var(--ink);
+    line-height: 1.55; font-size: 16px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 80px; }
+  .num { font-variant-numeric: tabular-nums; }
+
+  header.hero {
+    background: linear-gradient(135deg, #0f6b5c 0%, #134e4a 60%, #3b2f1e 100%);
+    color: #fff; border-radius: var(--radius);
+    padding: 28px 24px; margin-bottom: 16px; position: relative; overflow: hidden;
+  }
+  header.hero::after {
+    content: ""; position: absolute; right: -40px; top: -40px;
+    width: 180px; height: 180px; border-radius: 50%;
+    border: 18px solid rgba(255,255,255,.08);
+  }
+  .eyebrow { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; opacity: .85; margin: 0 0 6px; }
+  header.hero h1 { margin: 0 0 8px; font-size: clamp(22px, 4.5vw, 30px); line-height: 1.2; }
+  header.hero p { margin: 0; opacity: .92; }
+
+  /* Toolbar & filter */
+  .toolbar {
+    position: sticky; top: 0; z-index: 10; background: var(--bg);
+    padding: 10px 0; margin-bottom: 8px; border-bottom: 1px solid var(--line);
+  }
+  @media (max-width: 640px) { .toolbar { position: static; } }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+  .filters label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); gap: 2px; flex: 1 1 140px; min-width: 0; }
+  select, .btn-sm {
+    font: inherit; font-size: 14px; padding: 7px 10px; border-radius: 9px;
+    border: 1px solid var(--line); background: var(--card); color: var(--ink); min-width: 0; width: 100%;
+  }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; align-items: center; }
+  .btn-sm { width: auto; cursor: pointer; font-weight: 600; }
+  .btn-sm.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  :root[data-theme="dark"] .btn-sm.primary { color: #0d1a18; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn-sm.primary { color: #0d1a18; } }
+  .btn-sm:hover { filter: brightness(1.06); }
+  .filter-note { font-size: 13px; color: var(--muted); margin-left: auto; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  .notice { background: var(--warn-bg); border-color: var(--warn-line); }
+  .notice.error { border-color: var(--error); }
+  .section-title { margin: 32px 0 12px; font-size: 20px; color: var(--accent); }
+  .section-title span { color: var(--warm); margin-right: 6px; }
+  h3 { margin: 0 0 4px; font-size: 16px; line-height: 1.4; }
+  .qnum { color: var(--accent); margin-right: 4px; }
+  .meta { font-size: 13px; color: var(--muted); margin: 0 0 14px; }
+  .insight { margin: 14px 0 0; padding: 10px 12px; background: var(--accent-soft); border-radius: 10px; font-size: 15px; }
+  .hidden { display: none !important; }
+
+  /* KPI */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+  .kpi .v { font-size: 30px; font-weight: 700; line-height: 1.1; color: var(--ink); }
+  .kpi .l { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* Ringkasan temuan */
+  .findings { margin: 0; padding-left: 20px; }
+  .findings li { margin-bottom: 8px; }
+  .findings b { color: var(--accent); }
+
+  /* Diagram batang horizontal */
+  .bars { display: grid; grid-template-columns: minmax(0, 38%) 1fr auto; gap: 6px 10px; align-items: center; }
+  .bars .lbl { font-size: 14px; overflow-wrap: anywhere; }
+  .bars .track { height: 18px; background: var(--track); border-radius: 4px; position: relative; }
+  .bars .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--bar); border-radius: 0 4px 4px 0; min-width: 2px; }
+  .bars .fill.muted { background: var(--other); }
+  .bars .val { font-size: 14px; text-align: right; white-space: nowrap; color: var(--ink); }
+  .bars .val small { color: var(--muted); }
+  .bars .row-hit { display: contents; }
+  @media (max-width: 560px) {
+    .bars { grid-template-columns: 1fr auto; }
+    .bars .lbl { grid-column: 1 / -1; margin-top: 4px; }
+  }
+
+  /* Diagram divergen (skala setuju/kualitas) */
+  .div-wrap { margin: 6px 0 4px; }
+  .div-axis { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .div-track { position: relative; height: 26px; }
+  .div-track::before { content: ""; position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--muted); opacity: .6; }
+  .seg { position: absolute; top: 0; bottom: 0; border-left: 1px solid var(--card); border-right: 1px solid var(--card); }
+  .seg.first { border-radius: 4px 0 0 4px; }
+  .seg.last { border-radius: 0 4px 4px 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 13px; color: var(--ink); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+  .legend .pct { color: var(--muted); margin-left: 4px; }
+
+  /* Tren harian */
+  .cols { display: flex; align-items: flex-end; gap: 2px; height: 140px; border-bottom: 1px solid var(--muted); padding-top: 8px; }
+  .cols .c { flex: 1; min-width: 2px; height: 100%; display: flex; align-items: flex-end; }
+  .cols .c span { display: block; width: 100%; background: var(--bar); border-radius: 4px 4px 0 0; min-height: 0; }
+  .cols .c:hover span { filter: brightness(1.15); }
+  .cols-axis { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  details { margin-top: 12px; }
+  summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  td.r, th.r { text-align: right; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .grid2 > .card { margin-bottom: 0; }
+
+  #tip {
+    position: fixed; z-index: 50; pointer-events: none; max-width: 260px;
+    background: var(--ink); color: var(--card); font-size: 13px; line-height: 1.4;
+    padding: 6px 9px; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,.18);
+    opacity: 0; transition: opacity .08s;
+  }
+  #tip.on { opacity: 1; }
+  [data-tip] { cursor: default; }
+
+  .skeleton { color: var(--muted); text-align: center; padding: 40px 0; }
+  footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 30px; }
+  a { color: var(--accent); }
+
+  @media print {
+    body { background: #fff; font-size: 12px; }
+    .toolbar, details, #tip, .no-print { display: none !important; }
+    .wrap { max-width: none; padding: 0; }
+    .card, .kpi { break-inside: avoid; border-color: #ccc; }
+    header.hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .fill, .seg, .cols span, .legend i { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">Laporan Hasil · Kajian Teknologi & AI · Jayapura/Papua</p>
+    <h1>Bagaimana warga Jayapura dan Papua menggunakan AI?</h1>
+    <p id="heroSub">Memuat data…</p>
+  </header>
+
+  <div class="toolbar" id="toolbar">
+    <div class="filters" id="filters"></div>
+    <div class="actions">
+      <button type="button" class="btn-sm" id="resetBtn">Hapus filter</button>
+      <button type="button" class="btn-sm" id="reloadBtn">Muat ulang data</button>
+      <button type="button" class="btn-sm" id="csvBtn">Unduh rekap (CSV)</button>
+      <button type="button" class="btn-sm primary" id="printBtn">Cetak / simpan PDF</button>
+      <span class="filter-note num" id="filterNote"></span>
+    </div>
+  </div>
+
+  <div id="banner"></div>
+  <main id="report"><p class="skeleton">Memuat data survei…</p></main>
+
+  <footer>
+    Laporan ini hanya menampilkan angka gabungan. Isian bebas dan cerita responden tidak ditampilkan.
+    · <a href="index.html">Buka formulir survei</a>
+  </footer>
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script src="pertanyaan.js"></script>
+<script>
+/* =========================================================
+   Laporan hasil survei. Data diambil dari Web App Apps Script
+   (SCRIPT_URL di pertanyaan.js) dengan parameter ?aksi=hasil.
+   Tambahkan ?demo=1 di alamat halaman untuk melihat contoh data.
+   ========================================================= */
+
+const params = new URLSearchParams(location.search);
+const DEMO = params.has("demo");
+const MIN_N = 5; // kelompok dengan responden kurang dari ini diberi tanda "n kecil"
+
+/* ---------- Metadata pertanyaan ---------- */
+const QUESTIONS = [];
+SECTIONS.forEach(sec => sec.questions.forEach(q => { q.section = sec.code; QUESTIONS.push(q); q.n = QUESTIONS.length; }));
+const Q = Object.fromEntries(QUESTIONS.map(q => [q.id, q]));
+
+const sameStart = (arr, ref) => ref.every((v, i) => arr[i] === v);
+// Skala bertingkat (Likert/kualitas): ditampilkan sebagai diagram divergen
+function scaleOf(q) {
+  if (!q.options) return null;
+  if (sameStart(q.options, AGREE4)) return { order: AGREE4, colors: ["neg2", "neg1", "pos1", "pos2"], neutral: -1, neg: 2,
+    negLabel: "tidak setuju", posLabel: "setuju", extra: q.options.slice(4) };
+  if (sameStart(q.options, SCALE5)) return { order: SCALE5, colors: ["neg2", "neg1", "neu", "pos1", "pos2"], neutral: 2, neg: 2,
+    negLabel: "buruk", posLabel: "baik", extra: q.options.slice(5) };
+  return null;
+}
+
+/* ---------- Utilitas ---------- */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pct = (a, b) => b ? a / b : 0;
+const fmtPct = x => Math.round(x * 100) + "%";
+const fmtNum = (x, d = 1) => x.toLocaleString("id-ID", { maximumFractionDigits: d, minimumFractionDigits: d });
+const fmtInt = x => x.toLocaleString("id-ID");
+const fmtDate = (s, long) => {
+  const d = new Date(s + "T00:00:00");
+  return isNaN(d) ? s : d.toLocaleDateString("id-ID", long ? { day: "numeric", month: "long", year: "numeric" } : { day: "numeric", month: "short" });
+};
+
+function normalize(q, x) {
+  if (q.options.includes(x)) return x;
+  const base = x.split(":")[0].trim();
+  if (q.options.includes(base)) return base;
+  return q.other || "Lainnya";
+}
+
+// Jawaban satu responden untuk satu pertanyaan: array pilihan, atau null jika kosong/dilewati
+function answers(row, q) {
+  const v = row[q.id];
+  if (v === undefined || v === null) return null;
+  if (q.type === "textarea") return Number(v) ? ["diisi"] : null;
+  const s = String(v).trim();
+  if (!s || s === "(dilewati)") return null;
+  return [...new Set(s.split("; ").map(x => normalize(q, x.trim())))];
+}
+
+function tally(rows, q) {
+  const counts = new Map((q.options || []).map(o => [o, 0]));
+  let basis = 0, skipped = 0;
+  rows.forEach(r => {
+    const a = answers(r, q);
+    if (!a) { if (String(r[q.id]) === "(dilewati)") skipped++; return; }
+    basis++;
+    a.forEach(o => counts.set(o, (counts.get(o) || 0) + 1));
+  });
+  return { basis, skipped, counts };
+}
+
+const isAIUser = r => { const a = answers(r, Q.q8); return a && !(a.length === 1 && a[0] === NEVER_AI); };
+
+// Proporsi responden (di antara yang menjawab q) yang pilihannya memenuhi fn
+function share(rows, qid, fn) {
+  const q = Q[qid]; let basis = 0, hit = 0;
+  rows.forEach(r => { const a = answers(r, q); if (!a) return; basis++; if (fn(a)) hit++; });
+  return { p: pct(hit, basis), basis, hit };
+}
+const anyOf = list => a => a.some(x => list.includes(x));
+
+function ranked(t, { excludeOptions = [] } = {}) {
+  return [...t.counts.entries()]
+    .filter(([o, c]) => c > 0 && !excludeOptions.includes(o))
+    .sort((a, b) => b[1] - a[1]);
+}
+
+/* ---------- Komponen diagram ---------- */
+// Batang horizontal; nilai = % dari basis responden yang menjawab
+function barChart(items, basis, { mutedLabels = [] } = {}) {
+  const max = Math.max(...items.map(i => i.count), 1);
+  return `<div class="bars">${items.map(i => {
+    const p = pct(i.count, basis);
+    const tip = `${esc(i.label)}: ${fmtInt(i.count)} dari ${fmtInt(basis)} responden (${fmtPct(p)})`;
+    return `<div class="lbl">${esc(i.label)}</div>
+      <div class="track" data-tip="${tip}"><div class="fill${mutedLabels.includes(i.label) ? " muted" : ""}" style="width:${(i.count / max * 100).toFixed(2)}%"></div></div>
+      <div class="val num">${fmtPct(p)} <small>(${fmtInt(i.count)})</small></div>`;
+  }).join("")}</div>`;
+}
+
+// Bar divergen: sisi negatif ke kiri, positif ke kanan, netral terbelah di tengah
+function divergingChart(t, sc) {
+  const vals = sc.order.map(o => t.counts.get(o) || 0);
+  const total = vals.reduce((a, b) => a + b, 0);
+  if (!total) return `<p class="meta">Belum ada jawaban.</p>`;
+  const shares = vals.map(v => v / total);
+  const negSum = shares.slice(0, sc.neg).reduce((a, b) => a + b, 0);
+  const neuShare = sc.neutral >= 0 ? shares[sc.neutral] : 0;
+  // setiap sisi diskalakan ke 50% lebar → 100% satu sisi = setengah bar
+  let x = 50 - (negSum + neuShare / 2) * 50;
+  const nonzero = shares.map((s, i) => s > 0 ? i : -1).filter(i => i >= 0);
+  const segs = shares.map((s, i) => {
+    if (!s) return "";
+    const w = s * 50;
+    const cls = ["seg", i === nonzero[0] ? "first" : "", i === nonzero[nonzero.length - 1] ? "last" : ""].join(" ");
+    const html = `<div class="${cls}" style="left:${x.toFixed(2)}%;width:${w.toFixed(2)}%;background:var(--${sc.colors[i]})"
+      data-tip="${esc(sc.order[i])}: ${fmtInt(vals[i])} responden (${fmtPct(s)})"></div>`;
+    x += w;
+    return html;
+  }).join("");
+  const legend = sc.order.map((o, i) =>
+    `<span><i style="background:var(--${sc.colors[i]})"></i>${esc(o)}<span class="pct num">${fmtPct(shares[i])}</span></span>`).join("");
+  return `<div class="div-wrap">
+      <div class="div-axis"><span>← ${sc.negLabel}</span><span>${sc.posLabel} →</span></div>
+      <div class="div-track">${segs}</div>
+    </div><div class="legend">${legend}</div>`;
+}
+
+function dataTable(rowsHtml, head) {
+  return `<details><summary>Lihat tabel</summary><table><thead><tr>${head.map((h, i) =>
+    `<th class="${i ? "r" : ""}">${h}</th>`).join("")}</tr></thead><tbody>${rowsHtml}</tbody></table></details>`;
+}
+
+/* ---------- Kartu per pertanyaan ---------- */
+function questionCard(rows, q) {
+  const t = tally(rows, q);
+  const head = `<h3><span class="qnum">${q.n}.</span>${esc(q.text)}</h3>`;
+  const skippedNote = t.skipped ? ` · ${fmtInt(t.skipped)} dilewati otomatis` : "";
+
+  if (q.type === "textarea") {
+    return `<div class="card">${head}
+      <p class="meta">Pertanyaan terbuka (opsional)</p>
+      <p class="insight"><b class="num">${fmtInt(t.basis)}</b> dari ${fmtInt(rows.length)} responden (${fmtPct(pct(t.basis, rows.length))})
+      menuliskan cerita pengalaman mereka. Isi cerita tidak ditampilkan di laporan publik demi menjaga kerahasiaan responden;
+      bacalah langsung di spreadsheet untuk analisa kualitatif.</p></div>`;
+  }
+
+  const multi = q.type === "checkbox";
+  const meta = `<p class="meta num">Basis: ${fmtInt(t.basis)} responden${skippedNote}${multi ? " · boleh pilih lebih dari satu, total bisa lebih dari 100%" : ""}</p>`;
+  if (!t.basis) return `<div class="card">${head}${meta}<p class="meta">Belum ada jawaban untuk pilihan filter ini.</p></div>`;
+
+  const sc = scaleOf(q);
+  let chart, insight;
+  const tableRows = [...t.counts.entries()].map(([o, c]) =>
+    `<tr><td>${esc(o)}</td><td class="r num">${fmtInt(c)}</td><td class="r num">${fmtPct(pct(c, t.basis))}</td></tr>`).join("");
+
+  if (sc) {
+    const extraCount = sc.extra.reduce((a, o) => a + (t.counts.get(o) || 0), 0);
+    const scaled = t.basis - extraCount;
+    const neg = sc.order.slice(0, sc.neg).reduce((a, o) => a + (t.counts.get(o) || 0), 0);
+    const pos = sc.order.slice(sc.order.length - 2).reduce((a, o) => a + (t.counts.get(o) || 0), 0);
+    chart = divergingChart(t, sc);
+    if (extraCount) chart += `<p class="meta num" style="margin-top:8px">Tidak termasuk ${fmtInt(extraCount)} responden yang menjawab "${esc(sc.extra.join(", "))}" (${fmtPct(pct(extraCount, t.basis))}).</p>`;
+    const net = pct(pos, scaled) - pct(neg, scaled);
+    insight = `<b class="num">${fmtPct(pct(pos, scaled))}</b> menjawab ${sc.posLabel} dan <b class="num">${fmtPct(pct(neg, scaled))}</b> menjawab ${sc.negLabel}` +
+      (sc.neutral >= 0 ? `; ${fmtPct(pct(t.counts.get(sc.order[sc.neutral]) || 0, scaled))} menjawab "${sc.order[sc.neutral]}"` : "") +
+      `. Selisih bersih <b class="num">${net >= 0 ? "+" : ""}${Math.round(net * 100)} poin</b> — ` +
+      (Math.abs(net) < 0.1 ? "pendapat responden terbelah." : net > 0 ? `cenderung ${sc.posLabel}.` : `cenderung ${sc.negLabel}.`);
+  } else {
+    // Pilihan tunggal: urutan opsi asli (sering bertingkat). Pilihan ganda: urut dari terbanyak.
+    let items = [...t.counts.entries()].map(([label, count]) => ({ label, count }));
+    if (multi) items.sort((a, b) => b.count - a.count);
+    chart = barChart(items, t.basis, { mutedLabels: ["Lainnya", "Tidak tahu", NEVER_AI, NOT_WORKING] });
+    const top = ranked(t);
+    const [a, b] = top;
+    insight = multi
+      ? `Paling banyak dipilih: <b>${esc(a[0])}</b> (${fmtPct(pct(a[1], t.basis))})` + (b ? `, diikuti ${esc(b[0])} (${fmtPct(pct(b[1], t.basis))}).` : ".")
+      : `Jawaban terbanyak: <b>${esc(a[0])}</b> (${fmtPct(pct(a[1], t.basis))} responden)` + (b ? `; berikutnya ${esc(b[0])} (${fmtPct(pct(b[1], t.basis))}).` : ".");
+  }
+  return `<div class="card">${head}${meta}${chart}<p class="insight">${insight}</p>
+    ${dataTable(tableRows, ["Pilihan", "Jumlah", "%"])}</div>`;
+}
+
+/* ---------- KPI & ringkasan temuan ---------- */
+function kpis(rows) {
+  const users = share(rows, "q8", a => !(a.length === 1 && a[0] === NEVER_AI));
+  const daily = share(rows, "q9", anyOf(["Setiap hari"]));
+  const check = share(rows, "q14", anyOf(["Selalu"]));
+  const fake = share(rows, "q26", anyOf(["Ya"]));
+  const tile = (v, l, tip) => `<div class="kpi" ${tip ? `data-tip="${esc(tip)}"` : ""}><div class="v num">${v}</div><div class="l">${l}</div></div>`;
+  return `<div class="kpis">
+    ${tile(fmtInt(rows.length), "responden")}
+    ${tile(users.basis ? fmtPct(users.p) : "–", "pernah memakai AI (6 bln terakhir)", `${fmtInt(users.hit)} dari ${fmtInt(users.basis)} responden`)}
+    ${tile(daily.basis ? fmtPct(daily.p) : "–", "pengguna AI memakai chatbot setiap hari", `${fmtInt(daily.hit)} dari ${fmtInt(daily.basis)} pengguna AI`)}
+    ${tile(check.basis ? fmtPct(check.p) : "–", "pengguna AI selalu memeriksa jawaban AI", `${fmtInt(check.hit)} dari ${fmtInt(check.basis)} pengguna AI`)}
+    ${tile(fake.basis ? fmtPct(fake.p) : "–", "pernah melihat konten palsu buatan AI", `${fmtInt(fake.hit)} dari ${fmtInt(fake.basis)} responden`)}
+  </div>`;
+}
+
+function findings(rows) {
+  const out = [];
+  const N = rows.length;
+  const topOf = (qid, k = 1, opts) => { const t = tally(rows, Q[qid]); return { t, top: ranked(t, opts).slice(0, k) }; };
+  const list = (t, top) => top.map(([o, c]) => `<b>${esc(o)}</b> (${fmtPct(pct(c, t.basis))})`).join(", ");
+
+  const age = topOf("q1"); const gender = tally(rows, Q.q2);
+  if (age.top.length) {
+    out.push(`Sebanyak <b class="num">${fmtInt(N)}</b> responden ikut serta; kelompok usia terbesar adalah ${list(age.t, age.top)}. ` +
+      `Komposisi jenis kelamin: ${[...gender.counts].map(([o, c]) => `${esc(o)} ${fmtPct(pct(c, gender.basis))}`).join(", ")}.`);
+  }
+  const users = share(rows, "q8", a => !(a.length === 1 && a[0] === NEVER_AI));
+  const apps = topOf("q8", 3, { excludeOptions: [NEVER_AI, "Lainnya"] });
+  if (users.basis) {
+    out.push(`<b class="num">${fmtPct(users.p)}</b> responden sudah memakai AI dalam 6 bulan terakhir. ` +
+      (apps.top.length ? `Aplikasi paling populer: ${list(apps.t, apps.top)}.` : ""));
+  }
+  const freq = share(rows, "q9", anyOf(["Setiap hari", "Lebih dari 3 kali seminggu"]));
+  const purpose = topOf("q10", 2, { excludeOptions: ["Lainnya"] });
+  if (freq.basis) {
+    out.push(`Di antara pengguna AI, <b class="num">${fmtPct(freq.p)}</b> memakai chatbot lebih dari 3 kali seminggu atau setiap hari. ` +
+      (purpose.top.length ? `Keperluan utama: ${list(purpose.t, purpose.top)}.` : ""));
+  }
+  const beginner = share(rows, "q12", anyOf(["Pemula"]));
+  const learn = topOf("q13");
+  if (beginner.basis) {
+    out.push(`<b class="num">${fmtPct(beginner.p)}</b> pengguna menilai diri masih <b>pemula</b>. ` +
+      (learn.top.length ? `Sumber belajar terbanyak adalah ${list(learn.t, learn.top)}, menunjukkan peluang untuk pelatihan yang lebih terstruktur.` : ""));
+  }
+  const rarely = share(rows, "q14", anyOf(["Jarang", "Tidak pernah"]));
+  if (rarely.basis) {
+    out.push(`<b class="num">${fmtPct(rarely.p)}</b> pengguna <b>jarang atau tidak pernah</b> memeriksa kebenaran jawaban AI` +
+      (rarely.p >= 0.3 ? `. Ini sinyal penting bagi program literasi digital.` : `, sedangkan sebagian besar lainnya cukup kritis.`));
+  }
+  const workBase = rows.filter(r => { const a = answers(r, Q.q15); return a && !a.includes(NOT_WORKING); });
+  const workRate = share(workBase, "q15", a => a.some(x => x.startsWith("Ya")));
+  if (workRate.basis) {
+    out.push(`Di antara pengguna AI yang bekerja atau berusaha, <b class="num">${fmtPct(workRate.p)}</b> sudah memakai AI untuk pekerjaan (rutin atau sesekali).`);
+  }
+  const barrier = topOf("q19", 2); const worry = topOf("q20", 2, { excludeOptions: ["Lainnya"] });
+  if (barrier.top.length) {
+    out.push(`Hambatan terbesar: ${list(barrier.t, barrier.top)}. Kekhawatiran utama: ${list(worry.t, worry.top)}.`);
+  }
+  const net = tally(rows, Q.q22);
+  if (net.basis) {
+    const score = SCALE5.reduce((a, o, i) => a + (net.counts.get(o) || 0) * (i + 1), 0) / net.basis;
+    const bad = pct((net.counts.get("Sangat buruk") || 0) + (net.counts.get("Buruk") || 0), net.basis);
+    out.push(`Kualitas internet rata-rata dinilai <b class="num">${fmtNum(score)} dari 5</b>; <b class="num">${fmtPct(bad)}</b> menyebutnya buruk atau sangat buruk.`);
+  }
+  const ctx = tally(rows, Q.q24);
+  if (ctx.basis) {
+    const known = ctx.basis - (ctx.counts.get("Tidak tahu") || 0);
+    const good = (ctx.counts.get("Baik") || 0) + (ctx.counts.get("Sangat baik") || 0);
+    out.push(`Hanya <b class="num">${fmtPct(pct(good, known))}</b> responden (yang memberi penilaian) menganggap AI sudah memahami konteks Papua dengan baik.`);
+  }
+  const fake = share(rows, "q26", anyOf(["Ya"]));
+  if (fake.basis) out.push(`<b class="num">${fmtPct(fake.p)}</b> responden pernah melihat foto, suara, atau video palsu buatan AI beredar di grup lokal.`);
+  const ready = share(rows, "q27", anyOf(["Setuju", "Sangat setuju"]));
+  if (ready.basis) out.push(`<b class="num">${fmtPct(ready.p)}</b> setuju bahwa Papua siap secara ekonomi memanfaatkan AI.`);
+  const policy = topOf("q28", 3);
+  if (policy.top.length) out.push(`Tiga prioritas kebijakan yang paling banyak diminta: ${list(policy.t, policy.top)}.`);
+  return out;
+}
+
+/* ---------- Analisa silang ---------- */
+function crossCard(rows, title, groupQ, metric, metricLabel) {
+  const g = Q[groupQ];
+  const items = g.options.map(o => {
+    const sub = rows.filter(r => { const a = answers(r, g); return a && a.includes(o); });
+    const m = metric(sub);
+    return { label: o, n: m.basis, value: m.value, text: m.text };
+  }).filter(i => i.n > 0);
+  if (!items.length) return "";
+  const max = Math.max(...items.map(i => i.value), 0.0001);
+  const body = `<div class="bars">${items.map(i => {
+    const small = i.n < MIN_N;
+    return `<div class="lbl">${esc(i.label)} <small class="meta num">(n=${i.n}${small ? ", n kecil" : ""})</small></div>
+      <div class="track" data-tip="${esc(i.label)}: ${esc(i.text)} · n=${i.n}"><div class="fill${small ? " muted" : ""}" style="width:${(i.value / max * 100).toFixed(2)}%"></div></div>
+      <div class="val num">${esc(i.text)}</div>`;
+  }).join("")}</div>`;
+  const rowsHtml = items.map(i => `<tr><td>${esc(i.label)}</td><td class="r num">${i.n}</td><td class="r num">${esc(i.text)}</td></tr>`).join("");
+  return `<div class="card"><h3>${title}</h3><p class="meta">${metricLabel}</p>${body}
+    ${dataTable(rowsHtml, ["Kelompok", "n", "Nilai"])}</div>`;
+}
+const rateMetric = (qid, fn) => sub => { const s = share(sub, qid, fn); return { basis: s.basis, value: s.p, text: fmtPct(s.p) }; };
+const scoreMetric = qid => sub => {
+  const t = tally(sub, Q[qid]);
+  const n = SCALE5.reduce((a, o) => a + (t.counts.get(o) || 0), 0);
+  const v = n ? SCALE5.reduce((a, o, i) => a + (t.counts.get(o) || 0) * (i + 1), 0) / n : 0;
+  return { basis: n, value: v, text: n ? fmtNum(v) + " / 5" : "–" };
+};
+
+function crossSection(rows) {
+  const users = a => !(a.length === 1 && a[0] === NEVER_AI);
+  return `<h2 class="section-title"><span>★</span>Analisa Silang</h2>
+    <p class="meta">Membandingkan kelompok responden. Kelompok dengan kurang dari ${MIN_N} responden diberi warna abu-abu dan tidak sebaiknya disimpulkan.</p>
+    <div class="grid2">
+      ${crossCard(rows, "Penggunaan AI menurut usia", "q1", rateMetric("q8", users), "% responden yang memakai AI dalam 6 bulan terakhir")}
+      ${crossCard(rows, "Penggunaan AI menurut pekerjaan", "q4", rateMetric("q8", users), "% responden yang memakai AI dalam 6 bulan terakhir")}
+      ${crossCard(rows, "Kualitas internet menurut domisili", "q3", scoreMetric("q22"), "Rata-rata skor kualitas internet (1 = sangat buruk, 5 = sangat baik)")}
+      ${crossCard(rows, "Kebiasaan memeriksa jawaban AI menurut usia", "q1", rateMetric("q14", anyOf(["Selalu"])), "% pengguna AI yang selalu memeriksa kebenaran jawaban AI")}
+    </div>`;
+}
+
+/* ---------- Tren pengisian harian ---------- */
+function trendCard(rows) {
+  const byDay = new Map();
+  rows.forEach(r => { const d = String(r.timestamp || "").slice(0, 10); if (/^\d{4}-\d{2}-\d{2}$/.test(d)) byDay.set(d, (byDay.get(d) || 0) + 1); });
+  if (!byDay.size) return "";
+  const days = [...byDay.keys()].sort();
+  const all = [];
+  for (let d = new Date(days[0] + "T00:00:00Z"); d <= new Date(days[days.length - 1] + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + 1)) {
+    all.push(d.toISOString().slice(0, 10));
+  }
+  const max = Math.max(...byDay.values());
+  const peak = days.reduce((a, d) => byDay.get(d) > byDay.get(a) ? d : a, days[0]);
+  const cols = all.map(d => {
+    const c = byDay.get(d) || 0;
+    return `<div class="c" data-tip="${fmtDate(d, true)}: ${c} jawaban"><span style="height:${(c / max * 100).toFixed(1)}%"></span></div>`;
+  }).join("");
+  const srcCounts = new Map();
+  rows.forEach(r => { const s = String(r.sumber || "langsung"); srcCounts.set(s, (srcCounts.get(s) || 0) + 1); });
+  const srcItems = [...srcCounts].sort((a, b) => b[1] - a[1]).map(([label, count]) => ({ label, count }));
+  return `<div class="grid2">
+    <div class="card"><h3>Jumlah jawaban per hari</h3>
+      <p class="meta num">${fmtDate(all[0], true)} – ${fmtDate(all[all.length - 1], true)} · puncak ${fmtInt(max)} jawaban pada ${fmtDate(peak, true)}</p>
+      <div class="cols">${cols}</div>
+      <div class="cols-axis"><span>${fmtDate(all[0])}</span><span>${fmtDate(all[all.length - 1])}</span></div>
+      ${dataTable(all.map(d => `<tr><td>${fmtDate(d, true)}</td><td class="r num">${byDay.get(d) || 0}</td></tr>`).join(""), ["Tanggal", "Jawaban"])}
+    </div>
+    <div class="card"><h3>Saluran penyebaran tautan</h3>
+      <p class="meta">Dari parameter <code>?src=</code> pada tautan survei</p>
+      ${barChart(srcItems, rows.length)}
+    </div></div>`;
+}
+
+/* ---------- Filter ---------- */
+const FILTERS = [
+  { id: "q1", label: "Usia" }, { id: "q2", label: "Jenis kelamin" },
+  { id: "q3", label: "Domisili" }, { id: "q4", label: "Pekerjaan" }, { id: "sumber", label: "Sumber tautan" },
+];
+const state = {};
+let ALL_ROWS = [];
+
+function buildFilters() {
+  const box = document.getElementById("filters");
+  box.innerHTML = FILTERS.map(f => {
+    const opts = f.id === "sumber"
+      ? [...new Set(ALL_ROWS.map(r => String(r.sumber || "langsung")))].sort()
+      : Q[f.id].options;
+    return `<label>${f.label}<select data-f="${f.id}"><option value="">Semua</option>${opts.map(o =>
+      `<option value="${esc(o)}">${esc(o)}</option>`).join("")}</select></label>`;
+  }).join("");
+  box.querySelectorAll("select").forEach(s => s.addEventListener("change", () => { state[s.dataset.f] = s.value; render(); }));
+}
+
+function filtered() {
+  return ALL_ROWS.filter(r => FILTERS.every(f => {
+    const v = state[f.id];
+    if (!v) return true;
+    if (f.id === "sumber") return String(r.sumber || "langsung") === v;
+    const a = answers(r, Q[f.id]);
+    return a && a.includes(v);
+  }));
+}
+
+/* ---------- Render utama ---------- */
+let lastUpdated = null;
+function render() {
+  const rows = filtered();
+  const active = FILTERS.filter(f => state[f.id]).map(f => `${f.label}: ${state[f.id]}`);
+  document.getElementById("filterNote").textContent = active.length
+    ? `${fmtInt(rows.length)} dari ${fmtInt(ALL_ROWS.length)} responden`
+    : `${fmtInt(ALL_ROWS.length)} responden`;
+  const report = document.getElementById("report");
+
+  if (!rows.length) {
+    report.innerHTML = `<div class="card notice"><p style="margin:0">${ALL_ROWS.length
+      ? "Tidak ada responden yang cocok dengan filter ini. Coba hapus salah satu filter."
+      : "Belum ada jawaban yang masuk. Laporan akan muncul setelah responden mulai mengisi survei."}</p></div>`;
+    return;
+  }
+
+  const smallSample = rows.length < 30
+    ? `<div class="card notice"><b>Catatan:</b> jumlah responden ${active.length ? "pada filter ini " : ""}masih ${fmtInt(rows.length)} orang.
+       Persentase bisa berubah banyak dengan sedikit jawaban tambahan, jadi baca hasil sebagai gambaran awal.</div>` : "";
+
+  const sections = SECTIONS.map(sec => `<h2 class="section-title" id="sec-${sec.code}"><span>${sec.code}.</span>${esc(sec.title)}</h2>
+    ${sec.aiOnly ? `<p class="meta">Bagian ini hanya diisi responden yang pernah memakai AI.</p>` : ""}
+    ${sec.questions.map(q => questionCard(rows, q)).join("")}`).join("");
+
+  const f = findings(rows);
+  report.innerHTML = `
+    ${active.length ? `<div class="card notice"><b>Filter aktif:</b> ${esc(active.join(" · "))}</div>` : ""}
+    ${kpis(rows)}
+    ${smallSample}
+    <div class="card"><h2 class="section-title" style="margin-top:0"><span>◆</span>Ringkasan Temuan</h2>
+      <ol class="findings">${f.map(x => `<li>${x}</li>`).join("")}</ol>
+    </div>
+    ${trendCard(rows)}
+    ${crossSection(rows)}
+    ${sections}
+    <div class="card"><h3>Catatan metodologi</h3>
+      <p class="meta" style="margin:0">Survei disebarkan secara daring melalui tautan (pengambilan sampel non-acak), sehingga hasilnya
+      menggambarkan responden yang mengisi, bukan seluruh warga Jayapura/Papua. Persentase dihitung dari responden yang menjawab
+      pertanyaan tersebut (basis). Pertanyaan 9–18 hanya ditanyakan kepada pengguna AI, dan pertanyaan 16–17 hanya kepada yang bekerja.
+      Jawaban "Lainnya" digabungkan tanpa menampilkan isian bebas. ${lastUpdated ? `Data diambil ${new Date(lastUpdated).toLocaleString("id-ID")}.` : ""}</p>
+    </div>`;
+}
+
+/* ---------- Ambil data ---------- */
+function rowsFromJson(json) {
+  const k = json.kolom;
+  return json.baris.map(r => Object.fromEntries(k.map((key, i) => [key, r[i]])));
+}
+
+async function load() {
+  const report = document.getElementById("report");
+  const banner = document.getElementById("banner");
+  const sub = document.getElementById("heroSub");
+  report.innerHTML = `<p class="skeleton">Memuat data survei…</p>`;
+  banner.innerHTML = "";
+  try {
+    if (DEMO) {
+      ALL_ROWS = demoRows(160);
+      lastUpdated = new Date().toISOString();
+      banner.innerHTML = `<div class="card notice"><b>Mode contoh:</b> angka di halaman ini adalah data acak untuk melihat tampilan laporan,
+        bukan hasil survei sebenarnya. <a href="${location.pathname}">Tampilkan data asli</a></div>`;
+    } else {
+      if (!SCRIPT_URL || SCRIPT_URL.startsWith("PASTE_")) throw new Error("SCRIPT_URL belum diisi di pertanyaan.js.");
+      const url = new URL(SCRIPT_URL);
+      url.searchParams.set("aksi", "hasil");
+      if (params.get("kunci")) url.searchParams.set("kunci", params.get("kunci"));
+      const res = await fetch(url, { cache: "no-store" });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || "Data tidak bisa dibaca.");
+      if (!Array.isArray(json.baris)) throw new Error("Web App belum mendukung laporan. Terapkan versi baru Code.gs (lihat README).");
+      ALL_ROWS = rowsFromJson(json);
+      lastUpdated = json.diperbarui;
+    }
+    sub.textContent = `${fmtInt(ALL_ROWS.length)} responden · diperbarui ${new Date(lastUpdated).toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short" })}`;
+    buildFilters();
+    FILTERS.forEach(f => { delete state[f.id]; });
+    render();
+  } catch (err) {
+    console.error(err);
+    sub.textContent = "Data belum bisa dimuat.";
+    report.innerHTML = `<div class="card notice error"><p style="margin-top:0"><b>Data survei gagal dimuat.</b> ${esc(err.message || err)}</p>
+      <p style="margin-bottom:0">Pastikan <code>Code.gs</code> versi terbaru sudah diterapkan sebagai versi baru Web App, lalu muat ulang.
+      Untuk melihat tampilan laporan dengan data contoh, buka <a href="?demo=1">hasil.html?demo=1</a>.</p></div>`;
+  }
+}
+
+/* ---------- Data contoh (?demo=1) ---------- */
+function demoRows(n) {
+  let seed = 20261113;
+  const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const pick = (opts, w) => { const ws = w || opts.map(() => 1); let x = rnd() * ws.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < opts.length; i++) { x -= ws[i]; if (x <= 0) return opts[i]; } return opts[opts.length - 1]; };
+  const pickMany = (opts, k, w) => { const s = new Set(); const want = 1 + Math.floor(rnd() * k);
+    while (s.size < want) s.add(pick(opts, w)); return [...s].join("; "); };
+  const W = {
+    q1: [6, 48, 34, 12], q2: [55, 45], q3: [52, 30, 6, 12], q4: [34, 12, 14, 10, 9, 5, 5, 8, 3],
+    q6: [12, 38, 34, 16], q7: [14, 40, 36, 10], q9: [18, 30, 24, 28], q11: [8, 44, 48], q12: [40, 42, 15, 3],
+    q14: [18, 46, 26, 10], q15: [38, 34, 18, 10], q16: [6, 52, 26, 4, 12], q17: [26, 46, 22, 6],
+    q21: [10, 38, 44, 8], q22: [10, 28, 38, 18, 6], q23: [28, 40, 22, 10], q24: [12, 26, 30, 12, 4, 16],
+    q25: [8, 30, 42, 20], q26: [52, 22, 26], q27: [22, 46, 26, 6],
+  };
+  const sources = ["langsung", "wa-uncen", "umkm", "gereja", "ig"];
+  const today = new Date(); const rows = [];
+  for (let i = 0; i < n; i++) {
+    const r = {};
+    const d = new Date(today); d.setDate(d.getDate() - Math.floor(Math.pow(rnd(), 1.6) * 24));
+    r.timestamp = d.toISOString().slice(0, 10);
+    r.sumber = pick(sources, [30, 25, 15, 15, 15]);
+    QUESTIONS.forEach(q => {
+      if (q.type === "textarea") { r[q.id] = rnd() < 0.3 ? 1 : 0; return; }
+      if (q.id === "q8") { r.q8 = rnd() < 0.18 ? NEVER_AI : pickMany(q.options.slice(0, 7), 3, [60, 55, 30, 12, 10, 5, 3]); return; }
+      if (q.type === "checkbox") { r[q.id] = pickMany(q.options, q.max || 3); return; }
+      r[q.id] = pick(q.options, W[q.id]);
+    });
+    if (r.q4 === "Pelajar atau mahasiswa" || r.q4 === "Belum atau tidak bekerja") r.q5 = "";
+    const user = r.q8 !== NEVER_AI;
+    QUESTIONS.forEach(q => {
+      if (q.aiUser && !user) r[q.id] = "(dilewati)";
+      else if (q.worker && r.q15 === NOT_WORKING) r[q.id] = "(dilewati)";
+    });
+    if (user && rnd() < 0.6) r.q18 = "";
+    rows.push(r);
+  }
+  return rows;
+}
+
+/* ---------- Ekspor rekap CSV ---------- */
+function exportCsv() {
+  const rows = filtered();
+  const lines = [["No", "Pertanyaan", "Pilihan", "Jumlah", "Persen", "Basis"]];
+  QUESTIONS.filter(q => q.options).forEach(q => {
+    const t = tally(rows, q);
+    t.counts.forEach((c, o) => lines.push([q.n, q.text, o, c, t.basis ? (c / t.basis * 100).toFixed(1) : "0", t.basis]));
+  });
+  const csv = "﻿" + lines.map(l => l.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  a.download = `rekap-survei-ai-papua-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/* ---------- Tooltip ---------- */
+const tip = document.getElementById("tip");
+document.addEventListener("pointermove", e => {
+  const t = e.target.closest && e.target.closest("[data-tip]");
+  if (!t) { tip.classList.remove("on"); return; }
+  tip.textContent = t.getAttribute("data-tip");
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = e.clientX + 12, y = e.clientY - h - 10;
+  if (x + w > innerWidth - 8) x = e.clientX - w - 12;
+  if (y < 8) y = e.clientY + 16;
+  tip.style.left = Math.max(8, x) + "px"; tip.style.top = y + "px";
+  tip.classList.add("on");
+});
+document.addEventListener("pointerleave", () => tip.classList.remove("on"));
+addEventListener("scroll", () => tip.classList.remove("on"), { passive: true });
+
+/* ---------- Tombol ---------- */
+document.getElementById("resetBtn").addEventListener("click", () => {
+  FILTERS.forEach(f => delete state[f.id]);
+  document.querySelectorAll("#filters select").forEach(s => s.value = "");
+  render();
+});
+document.getElementById("reloadBtn").addEventListener("click", load);
+document.getElementById("csvBtn").addEventListener("click", exportCsv);
+document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+load();
+</script>
+</body>
+</html>
