@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Survei Teknologi & AI di Jayapura/Papua</title>
+<meta name="description" content="Survei singkat penggunaan teknologi dan kecerdasan buatan (AI) di Jayapura dan Papua.">
+<style>
+  :root {
+    --bg: #f6f3ee;
+    --card: #ffffff;
+    --ink: #1f2a2e;
+    --muted: #5d6b70;
+    --line: #e2ddd4;
+    --accent: #0f6b5c;
+    --accent-soft: #e3f1ee;
+    --warm: #b5651d;
+    --error: #b42318;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 16px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px 80px; }
+
+  header.hero {
+    background: linear-gradient(135deg, #0f6b5c 0%, #134e4a 60%, #3b2f1e 100%);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  header.hero::after {
+    content: "";
+    position: absolute; right: -40px; top: -40px;
+    width: 180px; height: 180px; border-radius: 50%;
+    border: 18px solid rgba(255,255,255,.08);
+  }
+  .eyebrow { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; opacity: .85; margin: 0 0 6px; }
+  header.hero h1 { margin: 0 0 10px; font-size: clamp(22px, 4.5vw, 30px); line-height: 1.2; }
+  header.hero p { margin: 0; opacity: .92; }
+
+  .progress {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg);
+    padding: 10px 0 12px;
+  }
+  .progress-bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0; background: var(--accent); transition: width .25s ease; }
+  .progress-text { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .section-title { margin: 28px 0 10px; font-size: 18px; color: var(--accent); }
+  .section-title span { color: var(--warm); margin-right: 6px; }
+
+  fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+  legend { font-weight: 600; padding: 0; margin-bottom: 4px; }
+  .qnum { color: var(--accent); margin-right: 4px; }
+  .req { color: var(--error); margin-left: 2px; }
+  .hint { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+
+  .opt {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  .opt:hover { background: #faf8f4; }
+  .opt input { margin-top: 4px; accent-color: var(--accent); width: 18px; height: 18px; flex: none; }
+  .opt:has(input:checked) { background: var(--accent-soft); border-color: var(--accent); }
+  .opt.disabled { opacity: .45; cursor: not-allowed; }
+  .other-input { margin: -2px 0 10px 40px; width: calc(100% - 40px); }
+
+  input[type="text"], textarea {
+    width: 100%;
+    font: inherit;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--ink);
+  }
+  textarea { min-height: 110px; resize: vertical; }
+  input[type="text"]:focus, textarea:focus, .opt:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .q.invalid { border-color: var(--error); box-shadow: 0 0 0 1px var(--error) inset; }
+  .err { color: var(--error); font-size: 14px; margin: 6px 0 0; display: none; }
+  .q.invalid .err { display: block; }
+  .hidden { display: none !important; }
+
+  .consent { background: #fffaf2; border-color: #ecd9bd; }
+  .consent blockquote { margin: 0 0 14px; color: var(--ink); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font: inherit; font-weight: 600;
+    padding: 14px 22px;
+    border-radius: 12px;
+    border: 0;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    width: 100%;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn[disabled] { opacity: .6; cursor: wait; }
+  .form-msg { margin-top: 12px; font-size: 15px; }
+  .form-msg.error { color: var(--error); }
+
+  .thanks { text-align: center; padding: 40px 24px; }
+  .thanks h2 { color: var(--accent); margin-top: 0; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">Kajian Teknologi & AI · Jayapura/Papua</p>
+    <h1>Bagaimana warga Jayapura dan Papua menggunakan AI?</h1>
+    <p>Sekitar 7–10 menit · 29 pertanyaan · tanpa nama</p>
+  </header>
+
+  <div id="formArea">
+    <div class="progress" aria-hidden="true">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">0% terisi</div>
+    </div>
+
+    <form id="surveyForm" novalidate>
+      <div class="card consent q" id="q-consent">
+        <blockquote>
+          Selamat datang! Survei ini ingin mengetahui bagaimana warga Jayapura dan Papua menggunakan teknologi dan
+          kecerdasan buatan (AI), misalnya ChatGPT, Gemini, atau Meta AI di WhatsApp. Anda tidak perlu mencantumkan
+          nama, dan semua jawaban dijaga kerahasiaannya serta hanya dipakai untuk keperluan kajian. Tidak ada jawaban
+          benar atau salah.
+        </blockquote>
+        <label class="opt">
+          <input type="checkbox" name="consent" value="Ya">
+          <span>Saya bersedia mengisi survei ini secara sukarela.</span>
+        </label>
+        <p class="err">Mohon centang persetujuan untuk melanjutkan.</p>
+      </div>
+
+      <div id="questions"></div>
+
+      <!-- Honeypot: dibiarkan kosong oleh manusia, biasanya diisi bot -->
+      <div class="hp" aria-hidden="true">
+        <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+      </div>
+
+      <button type="submit" class="btn" id="submitBtn">Kirim Jawaban</button>
+      <p class="form-msg" id="formMsg" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+
+  <div class="card thanks hidden" id="thanks">
+    <h2>Terima kasih!</h2>
+    <p>Jawaban Anda sudah tersimpan. Bantu kajian ini dengan membagikan tautan survei ke teman, keluarga, atau komunitas Anda di Papua.</p>
+    <button type="button" class="btn" id="shareBtn" style="max-width:280px;margin-top:10px">Bagikan Survei</button>
+  </div>
+
+  <footer>Data hanya dipakai untuk keperluan kajian dan tidak dibagikan dalam bentuk identitas pribadi.</footer>
+</div>
+
+<script>
+/* =========================================================
+   KONFIGURASI
+   Ganti SCRIPT_URL dengan URL Web App dari Google Apps Script
+   (lihat README.md, langkah 3).
+   ========================================================= */
+const SCRIPT_URL = "PASTE_URL_WEB_APP_DI_SINI";
+
+/* ---------- Daftar pertanyaan ---------- */
+const AGREE4 = ["Sangat tidak setuju", "Tidak setuju", "Setuju", "Sangat setuju"];
+const SCALE5 = ["Sangat buruk", "Buruk", "Cukup", "Baik", "Sangat baik"];
+const NEVER_AI = "Belum pernah menggunakan AI";
+const NOT_WORKING = "Tidak bekerja atau berusaha";
+
+const SECTIONS = [
+  { code: "A", title: "Profil Responden", questions: [
+    { id: "q1", text: "Berapa usia Anda?", type: "radio", required: true,
+      options: ["Di bawah 18 tahun", "18–28 tahun (Gen Z)", "29–44 tahun (Milenial)", "45 tahun ke atas"] },
+    { id: "q2", text: "Apa jenis kelamin Anda?", type: "radio", required: true,
+      options: ["Laki-laki", "Perempuan"] },
+    { id: "q3", text: "Di mana Anda tinggal saat ini?", type: "radio", required: true,
+      options: ["Kota Jayapura", "Kabupaten Jayapura (Sentani dan sekitarnya)", "Kabupaten Keerom", "Kabupaten lain di Papua"],
+      other: "Kabupaten lain di Papua", otherPlaceholder: "Sebutkan kabupatennya" },
+    { id: "q4", text: "Apa pekerjaan atau status Anda saat ini?", type: "radio", required: true,
+      options: ["Pelajar atau mahasiswa", "ASN, TNI, atau Polri", "Karyawan swasta atau BUMN", "Wirausaha atau pelaku UMKM",
+                "Guru atau dosen", "Tenaga kesehatan", "Pekerja gereja, LSM, atau lembaga adat", "Belum atau tidak bekerja", "Lainnya"],
+      other: "Lainnya" },
+    { id: "q5", text: "Jika bekerja atau berusaha, di sektor apa?", type: "radio", required: false,
+      hint: "Lewati jika tidak bekerja atau berusaha.",
+      options: ["Digital, media, atau kreatif", "Pendidikan", "Perdagangan dan jasa konsumen", "Pemerintahan", "Kesehatan",
+                "Pertanian, perikanan, atau kehutanan", "Lainnya"],
+      other: "Lainnya" },
+  ]},
+  { code: "B", title: "Penggunaan AI", questions: [
+    { id: "q6", text: "Seberapa besar peran AI dalam kehidupan sehari-hari Anda?", type: "radio", required: true,
+      options: ["Tidak berperan sama sekali", "Sedikit berperan", "Cukup berperan", "Sangat berperan"] },
+    { id: "q7", text: "Seberapa setuju Anda dengan pernyataan \"Saya bergantung pada AI untuk aktivitas sehari-hari\"?",
+      type: "radio", required: true, options: AGREE4 },
+    { id: "q8", text: "Aplikasi AI apa saja yang Anda gunakan dalam 6 bulan terakhir?", type: "checkbox", required: true,
+      options: ["ChatGPT", "Meta AI (di WhatsApp, Instagram, atau Facebook)", "Google Gemini", "Microsoft Copilot",
+                "DeepSeek", "Perplexity", "Lainnya", NEVER_AI],
+      other: "Lainnya", exclusive: NEVER_AI },
+    { id: "q9", text: "Seberapa sering Anda memakai chatbot AI?", type: "radio", required: true, aiUser: true,
+      options: ["Kurang dari sekali seminggu", "1–3 kali seminggu", "Lebih dari 3 kali seminggu", "Setiap hari"] },
+    { id: "q10", text: "Untuk keperluan apa Anda memakai AI?", type: "checkbox", required: true, aiUser: true,
+      options: ["Mencari informasi atau merangkum jawaban", "Tugas sekolah atau kuliah",
+                "Pekerjaan kantor (surat, laporan, presentasi)", "Membuat konten media sosial", "Jualan atau promosi usaha",
+                "Menerjemahkan bahasa", "Menyiapkan bahan ibadah, khotbah, atau kegiatan gereja", "Hiburan", "Lainnya"],
+      other: "Lainnya" },
+    { id: "q11", text: "Secara umum, bagaimana dampak AI bagi hidup Anda?", type: "radio", required: true, aiUser: true,
+      options: ["Lebih banyak negatif", "Seimbang", "Lebih banyak positif"] },
+  ]},
+  { code: "C", title: "Keterampilan dan Cara Belajar", aiOnly: true, questions: [
+    { id: "q12", text: "Bagaimana Anda menilai kemampuan Anda menggunakan AI?", type: "radio", required: true, aiUser: true,
+      options: ["Pemula", "Menengah", "Mahir", "Ahli"] },
+    { id: "q13", text: "Dari mana Anda belajar menggunakan AI?", type: "checkbox", required: true, aiUser: true,
+      options: ["Media sosial atau YouTube", "Teman atau keluarga", "Sekolah atau kampus", "Kursus formal atau pelatihan", "Mencoba sendiri"] },
+    { id: "q14", text: "Apakah Anda memeriksa kebenaran jawaban AI, misalnya dengan buku, jurnal, atau sumber lain?",
+      type: "radio", required: true, aiUser: true, options: ["Selalu", "Kadang-kadang", "Jarang", "Tidak pernah"] },
+  ]},
+  { code: "D", title: "AI di Tempat Kerja dan Usaha", aiOnly: true, questions: [
+    { id: "q15", text: "Apakah Anda memakai AI untuk pekerjaan atau usaha Anda?", type: "radio", required: true, aiUser: true,
+      options: ["Ya, rutin", "Ya, sesekali", "Tidak", NOT_WORKING] },
+    { id: "q16", text: "Bagaimana sikap kantor atau organisasi Anda terhadap penggunaan AI?", type: "radio", required: true,
+      aiUser: true, worker: true,
+      options: ["Melarang", "Netral (tidak ada aturan)", "Mendorong", "Mewajibkan", "Tidak tahu"] },
+    { id: "q17", text: "Seberapa setuju Anda dengan pernyataan \"Pekerjaan saya bisa sepenuhnya digantikan AI dalam 5 tahun ke depan\"?",
+      type: "radio", required: true, aiUser: true, worker: true, options: AGREE4 },
+    { id: "q18", text: "Khusus pelaku usaha atau UMKM: di bagian apa AI paling membantu usaha Anda?", type: "checkbox",
+      required: false, aiUser: true, hint: "Lewati jika Anda tidak punya usaha.",
+      options: ["Promosi dan konten media sosial", "Melayani pelanggan", "Pembukuan atau perhitungan", "Mencari ide produk",
+                "Belum memakai AI untuk usaha"] },
+  ]},
+  { code: "E", title: "Tantangan dan Kekhawatiran", questions: [
+    { id: "q19", text: "Apa hambatan terbesar Anda dalam memakai AI?", type: "checkbox", required: true,
+      options: ["Keamanan data pribadi", "Jawaban AI tidak akurat", "Biaya atau akses",
+                "Bahasa atau tampilan aplikasi sulit dipahami", "Sulit memakai fitur lanjutan",
+                "Internet lambat atau tidak stabil", "Perangkat (HP atau laptop) kurang memadai"] },
+    { id: "q20", text: "Apa yang paling Anda khawatirkan dari AI?", type: "checkbox", required: true,
+      options: ["Foto, suara, atau video palsu (deepfake)", "Penyalahgunaan data pribadi", "Informasi yang salah atau hoaks",
+                "Kehilangan pekerjaan", "Lainnya"],
+      other: "Lainnya" },
+    { id: "q21", text: "Seberapa setuju Anda dengan pernyataan \"Informasi dari AI aman dipakai untuk keperluan sehari-hari\"?",
+      type: "radio", required: true, options: AGREE4 },
+  ]},
+  { code: "F", title: "Konteks Papua", questions: [
+    { id: "q22", text: "Bagaimana kualitas internet yang Anda pakai sehari-hari?", type: "radio", required: true, options: SCALE5 },
+    { id: "q23", text: "Berapa pengeluaran Anda untuk kuota atau internet per bulan?", type: "radio", required: true,
+      options: ["Kurang dari Rp50.000", "Rp50.000–Rp100.000", "Rp100.001–Rp200.000", "Lebih dari Rp200.000"] },
+    { id: "q24", text: "Menurut Anda, seberapa baik AI memahami konteks Papua, seperti nama tempat, istilah lokal, logat Melayu Papua, atau bahasa daerah?",
+      type: "radio", required: true, options: SCALE5.concat(["Tidak tahu"]) },
+    { id: "q25", text: "Seberapa setuju Anda dengan pernyataan \"Media sosial dan AI membuat saya lebih banyak mengonsumsi budaya luar daripada budaya Papua\"?",
+      type: "radio", required: true, options: AGREE4 },
+    { id: "q26", text: "Dalam setahun terakhir, apakah Anda pernah melihat foto, suara, atau video palsu buatan AI beredar di grup WhatsApp atau media sosial lokal?",
+      type: "radio", required: true, options: ["Ya", "Tidak", "Tidak yakin"] },
+  ]},
+  { code: "G", title: "Harapan dan Kebijakan", questions: [
+    { id: "q27", text: "Seberapa setuju Anda dengan pernyataan \"Papua siap secara ekonomi memanfaatkan AI\"?",
+      type: "radio", required: true, options: AGREE4 },
+    { id: "q28", text: "Apa yang paling perlu dilakukan pemerintah di Papua terkait AI?", type: "checkbox", required: true, max: 3,
+      hint: "Pilih paling banyak 3.",
+      options: ["Pelatihan AI dan keterampilan digital untuk pekerja", "Literasi digital untuk masyarakat",
+                "Aturan yang melindungi pekerja", "Pemerataan internet dan infrastruktur",
+                "Pengembangan AI dan konten berbahasa daerah Papua", "Perlindungan data pribadi dan pencegahan deepfake"] },
+    { id: "q29", text: "Ceritakan singkat pengalaman Anda, baik yang membantu maupun yang merugikan, saat menggunakan AI di Papua.",
+      type: "textarea", required: false, hint: "Opsional." },
+  ]},
+];
+
+/* ---------- Render ---------- */
+const container = document.getElementById("questions");
+const ALL_Q = [];
+let counter = 0;
+
+function el(tag, attrs = {}, children = []) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") n.className = v;
+    else if (k === "text") n.textContent = v;
+    else n.setAttribute(k, v);
+  }
+  for (const c of [].concat(children)) if (c) n.appendChild(c);
+  return n;
+}
+
+SECTIONS.forEach(sec => {
+  const h = el("h2", { class: "section-title", id: "sec-" + sec.code });
+  h.appendChild(el("span", { text: sec.code + "." }));
+  h.appendChild(document.createTextNode(sec.title));
+  container.appendChild(h);
+
+  sec.questions.forEach(q => {
+    counter++;
+    q.n = counter;
+    q.section = sec.code;
+    ALL_Q.push(q);
+
+    const card = el("div", { class: "card q", id: "card-" + q.id });
+    const fs = el("fieldset");
+    const legend = el("legend");
+    legend.appendChild(el("span", { class: "qnum", text: q.n + "." }));
+    legend.appendChild(document.createTextNode(q.text));
+    if (q.required) legend.appendChild(el("span", { class: "req", text: "*", "aria-hidden": "true" }));
+    fs.appendChild(legend);
+
+    let hint = q.hint || (q.type === "checkbox" ? "Boleh pilih lebih dari satu." : q.type === "radio" ? "Pilih satu." : "");
+    if (q.type === "checkbox" && q.hint) hint = q.hint;
+    if (hint) fs.appendChild(el("p", { class: "hint", text: hint }));
+
+    if (q.type === "textarea") {
+      fs.appendChild(el("textarea", { name: q.id, maxlength: "2000", placeholder: "Tulis jawaban Anda di sini…" }));
+    } else {
+      q.options.forEach((opt, i) => {
+        const inputId = q.id + "_" + i;
+        const input = el("input", { type: q.type, name: q.id, value: opt, id: inputId });
+        const lab = el("label", { class: "opt", for: inputId });
+        lab.appendChild(input);
+        lab.appendChild(el("span", { text: opt }));
+        fs.appendChild(lab);
+        if (q.other && opt === q.other) {
+          const t = el("input", { type: "text", class: "other-input hidden", name: q.id + "_lain",
+            placeholder: q.otherPlaceholder || "Sebutkan…", maxlength: "200", "aria-label": "Sebutkan lainnya" });
+          fs.appendChild(t);
+        }
+      });
+    }
+    fs.appendChild(el("p", { class: "err", text: q.max ? "Pilih 1 sampai " + q.max + " jawaban." : "Pertanyaan ini wajib dijawab." }));
+    card.appendChild(fs);
+    container.appendChild(card);
+  });
+});
+
+/* ---------- Helpers ---------- */
+const form = document.getElementById("surveyForm");
+const checked = name => Array.from(form.querySelectorAll(`input[name="${name}"]:checked`)).map(i => i.value);
+const isAIUser = () => { const v = checked("q8"); return !(v.length === 1 && v[0] === NEVER_AI); };
+const isWorker = () => checked("q15")[0] !== NOT_WORKING;
+
+function isVisible(q) {
+  if (q.aiUser && !isAIUser()) return false;
+  if (q.worker && !isWorker()) return false;
+  return true;
+}
+
+function updateVisibility() {
+  ALL_Q.forEach(q => {
+    const card = document.getElementById("card-" + q.id);
+    card.classList.toggle("hidden", !isVisible(q));
+  });
+  // sembunyikan judul bagian jika semua pertanyaannya tersembunyi
+  SECTIONS.forEach(sec => {
+    const anyVisible = sec.questions.some(isVisible);
+    document.getElementById("sec-" + sec.code).classList.toggle("hidden", !anyVisible);
+  });
+  // tampilkan kolom "sebutkan" untuk opsi Lainnya
+  ALL_Q.filter(q => q.other).forEach(q => {
+    const t = form.querySelector(`input[name="${q.id}_lain"]`);
+    t.classList.toggle("hidden", !checked(q.id).includes(q.other));
+  });
+  // batas maksimal pilihan
+  ALL_Q.filter(q => q.max).forEach(q => {
+    const n = checked(q.id).length;
+    form.querySelectorAll(`input[name="${q.id}"]`).forEach(i => {
+      const block = !i.checked && n >= q.max;
+      i.disabled = block;
+      i.closest(".opt").classList.toggle("disabled", block);
+    });
+  });
+  updateProgress();
+}
+
+function answered(q) {
+  if (q.type === "textarea") return form.querySelector(`textarea[name="${q.id}"]`).value.trim() !== "";
+  return checked(q.id).length > 0;
+}
+
+function updateProgress() {
+  const vis = ALL_Q.filter(isVisible);
+  const done = vis.filter(answered).length;
+  const pct = vis.length ? Math.round(done / vis.length * 100) : 0;
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressText").textContent = pct + "% terisi (" + done + " dari " + vis.length + " pertanyaan)";
+}
+
+/* ---------- Interaksi ---------- */
+form.addEventListener("change", e => {
+  const t = e.target;
+  // opsi eksklusif: "Belum pernah menggunakan AI"
+  if (t.name === "q8") {
+    const boxes = form.querySelectorAll('input[name="q8"]');
+    if (t.value === NEVER_AI && t.checked) boxes.forEach(b => { if (b !== t) b.checked = false; });
+    else if (t.checked) boxes.forEach(b => { if (b.value === NEVER_AI) b.checked = false; });
+  }
+  const card = t.closest(".q");
+  if (card) card.classList.remove("invalid");
+  updateVisibility();
+});
+form.addEventListener("input", e => { if (e.target.tagName === "TEXTAREA") updateProgress(); });
+
+/* ---------- Validasi ---------- */
+function validate() {
+  let firstBad = null;
+  const consentCard = document.getElementById("q-consent");
+  const consentOk = form.querySelector('input[name="consent"]').checked;
+  consentCard.classList.toggle("invalid", !consentOk);
+  if (!consentOk) firstBad = consentCard;
+
+  ALL_Q.forEach(q => {
+    const card = document.getElementById("card-" + q.id);
+    let ok = true;
+    if (isVisible(q)) {
+      const n = q.type === "textarea" ? (answered(q) ? 1 : 0) : checked(q.id).length;
+      if (q.required && n === 0) ok = false;
+      if (q.max && n > q.max) ok = false;
+    }
+    card.classList.toggle("invalid", !ok);
+    if (!ok && !firstBad) firstBad = card;
+  });
+  if (firstBad) firstBad.scrollIntoView({ behavior: "smooth", block: "center" });
+  return !firstBad;
+}
+
+/* ---------- Kumpulkan data ---------- */
+function collect() {
+  const data = new URLSearchParams();
+  data.append("website", form.querySelector('input[name="website"]').value); // honeypot
+  data.append("sumber", new URLSearchParams(location.search).get("src") || "langsung");
+  ALL_Q.forEach(q => {
+    let value = "";
+    if (isVisible(q)) {
+      if (q.type === "textarea") {
+        value = form.querySelector(`textarea[name="${q.id}"]`).value.trim();
+      } else {
+        value = checked(q.id).map(v => {
+          if (q.other && v === q.other) {
+            const extra = form.querySelector(`input[name="${q.id}_lain"]`).value.trim();
+            return extra ? v + ": " + extra : v;
+          }
+          return v;
+        }).join("; ");
+      }
+    } else {
+      value = "(dilewati)";
+    }
+    data.append(q.id, value);
+  });
+  return data;
+}
+
+/* ---------- Kirim ---------- */
+const btn = document.getElementById("submitBtn");
+const msg = document.getElementById("formMsg");
+
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  msg.textContent = ""; msg.className = "form-msg";
+  if (!validate()) {
+    msg.textContent = "Masih ada pertanyaan wajib yang belum dijawab (ditandai merah).";
+    msg.classList.add("error");
+    return;
+  }
+  if (!SCRIPT_URL || SCRIPT_URL.startsWith("PASTE_")) {
+    msg.textContent = "Form belum terhubung ke spreadsheet. Isi SCRIPT_URL di file index.html.";
+    msg.classList.add("error");
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = "Mengirim…";
+  try {
+    const res = await fetch(SCRIPT_URL, { method: "POST", body: collect() });
+    const json = await res.json().catch(() => ({ ok: res.ok }));
+    if (!json.ok) throw new Error(json.error || "Gagal menyimpan");
+    try { localStorage.setItem("survei_ai_papua_terkirim", new Date().toISOString()); } catch (_) {}
+    document.getElementById("formArea").classList.add("hidden");
+    document.getElementById("thanks").classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (err) {
+    console.error(err);
+    msg.textContent = "Maaf, jawaban belum terkirim. Periksa koneksi internet Anda lalu coba lagi.";
+    msg.classList.add("error");
+    btn.disabled = false;
+    btn.textContent = "Kirim Jawaban";
+  }
+});
+
+/* ---------- Bagikan ---------- */
+document.getElementById("shareBtn").addEventListener("click", async () => {
+  const url = location.origin + location.pathname;
+  const text = "Ayo isi survei singkat tentang penggunaan AI di Jayapura/Papua (7–10 menit, tanpa nama):";
+  if (navigator.share) {
+    try { await navigator.share({ title: document.title, text, url }); } catch (_) {}
+  } else {
+    window.open("https://wa.me/?text=" + encodeURIComponent(text + " " + url), "_blank");
+  }
+});
+
+/* ---------- Peringatan jika sudah pernah mengisi ---------- */
+try {
+  if (localStorage.getItem("survei_ai_papua_terkirim")) {
+    msg.textContent = "Perangkat ini sudah pernah mengirim jawaban. Jika Anda orang yang berbeda, silakan lanjut mengisi.";
+  }
+} catch (_) {}
+
+updateVisibility();
+</script>
+</body>
+</html>
