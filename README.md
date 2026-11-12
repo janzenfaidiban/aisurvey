@@ -4,11 +4,13 @@ Form survei statis untuk GitHub Pages. Setiap jawaban disimpan ke Google Spreads
 
 - **Form survei:** https://janzenfaidiban.github.io/aisurvey/
 - **Laporan hasil:** https://janzenfaidiban.github.io/aisurvey/hasil.html (data contoh: [`hasil.html?demo=1`](https://janzenfaidiban.github.io/aisurvey/hasil.html?demo=1))
+- **Penanggung jawab (PIC) survei:** [Ester Numbre](https://esternumbre.github.io/)
+- **Target responden:** 100 peserta
 
 **File:**
 - `index.html`: halaman form yang dipasang di GitHub Pages.
 - `hasil.html`: halaman laporan hasil survei (ringkasan temuan, diagram per pertanyaan, analisa silang, filter, cetak PDF, unduh CSV).
-- `pertanyaan.js`: daftar pertanyaan dan `SCRIPT_URL`, dipakai bersama oleh `index.html` dan `hasil.html`.
+- `pertanyaan.js`: pengaturan bersama untuk `index.html` dan `hasil.html`: `SCRIPT_URL`, PIC survei (`PIC`), target responden (`TARGET_RESPONDEN`), dan daftar pertanyaan.
 - `Code.gs`: skrip penerima jawaban (dan penyedia data laporan) yang dipasang di Google Apps Script.
 ## 1. Pasang skrip di spreadsheet
 
@@ -45,6 +47,7 @@ const SCRIPT_URL = "PASTE_URL_WEB_APP_DI_SINI";
 
 Buka https://janzenfaidiban.github.io/aisurvey/hasil.html. Isinya:
 
+- **Capaian target responden**: jumlah terkumpul dibanding target 100, sisa responden, jawaban hari ini dan 7 hari terakhir, rata-rata per hari, serta perkiraan tanggal target tercapai.
 - Angka utama (jumlah responden, % pengguna AI, dan lainnya) beserta **ringkasan temuan** yang ditulis otomatis dari data.
 - Tren jumlah jawaban per hari dan perbandingan saluran penyebaran (`?src=`).
 - **Analisa silang**: penggunaan AI menurut usia dan pekerjaan, kualitas internet menurut domisili, kebiasaan memeriksa jawaban AI menurut usia.
@@ -65,6 +68,7 @@ Tambahkan `?src=...` di akhir tautan untuk mencatat dari mana responden datang. 
 
 ## Catatan
 
+- Form memiliki navigasi bulatan nomor pertanyaan (sidebar kanan di layar lebar, deretan di bawah bar progres di HP): hijau = sudah dijawab, garis putus-putus = opsional, pudar = dilewati otomatis, merah = wajib tetapi belum dijawab saat tombol Kirim ditekan. Klik nomor untuk langsung menuju pertanyaannya.
 - Pertanyaan 9–18 otomatis dilewati jika responden memilih "Belum pernah menggunakan AI". Pertanyaan 16–17 dilewati jika responden tidak bekerja. Pertanyaan yang dilewati tercatat sebagai `(dilewati)`, sehingga bisa dibedakan dari jawaban kosong.
 - Jawaban dengan pilihan ganda disimpan dalam satu sel, dipisahkan tanda `; `. Untuk menghitung persentase per opsi, gunakan rumus seperti `=COUNTIF(J:J,"*ChatGPT*")` (kolom J = pertanyaan 8).
 - Form ini tidak menyimpan nama, email, atau nomor HP. Kolom tersembunyi (honeypot) dipakai untuk menyaring kiriman bot.

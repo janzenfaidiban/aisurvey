@@ -12,6 +12,12 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz6_TFDSpaJGTLrT-ZxW
 
 // AKfycbz6_TFDSpaJGTLrT-ZxWuW330swpkXu9R1EtQ2ZhgSfRBekXM2qoZysI75bqkilQVio
 
+// Penanggung jawab (PIC) survei, tampil di form dan laporan
+const PIC = { nama: "Ester Numbre", url: "https://esternumbre.github.io/" };
+
+// Target jumlah responden, dipakai untuk statistik capaian di hasil.html
+const TARGET_RESPONDEN = 100;
+
 /* ---------- Daftar pertanyaan ---------- */
 const AGREE4 = ["Sangat tidak setuju", "Tidak setuju", "Setuju", "Sangat setuju"];
 const SCALE5 = ["Sangat buruk", "Buruk", "Cukup", "Baik", "Sangat baik"];

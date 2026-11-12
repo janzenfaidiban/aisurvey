@@ -130,6 +130,48 @@
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
   footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 30px; }
+  footer a { color: var(--accent); }
+
+  /* PIC survei */
+  header.hero .pic { margin-top: 12px; font-size: 14px; position: relative; z-index: 1; }
+  header.hero .pic a { color: #fff; font-weight: 600; text-underline-offset: 3px; }
+
+  /* Navigasi nomor pertanyaan */
+  .qnav-head { display: none; }
+  .qnav-dots { display: flex; gap: 6px; overflow-x: auto; padding: 8px 2px 4px; scrollbar-width: thin; }
+  .qnav-dots button {
+    flex: none; width: 30px; height: 30px; border-radius: 50%;
+    font: inherit; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;
+    border: 2px solid var(--line); background: var(--card); color: var(--muted);
+    cursor: pointer; padding: 0; transition: background .15s, border-color .15s, color .15s;
+  }
+  .qnav-dots button:hover { border-color: var(--accent); color: var(--accent); }
+  .qnav-dots button.optional { border-style: dashed; }
+  .qnav-dots button.done { background: var(--accent); border-color: var(--accent); color: #fff; border-style: solid; }
+  .qnav-dots button.skip { opacity: .35; text-decoration: line-through; cursor: default; }
+  .qnav-dots button.bad { border-color: var(--error); color: var(--error); background: #fdecea; }
+  .qnav-dots button.current { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--warm); }
+  .qnav-dots .sec { display: none; }
+  .qnav-legend { display: none; }
+
+  @media (min-width: 1200px) {
+    .qnav {
+      position: fixed; top: 24px; left: calc(50% + 384px); width: 196px;
+      max-height: calc(100vh - 48px); overflow-y: auto;
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px;
+    }
+    .qnav-head { display: block; }
+    .qnav-head b { display: block; font-size: 14px; }
+    .qnav-head .progress-bar { margin: 8px 0 4px; height: 6px; }
+    .qnav-head span { font-size: 12px; color: var(--muted); }
+    .qnav-dots { display: grid; grid-template-columns: repeat(5, 30px); justify-content: space-between; overflow: visible; padding: 4px 0 0; }
+    .qnav-dots .sec { display: block; grid-column: 1 / -1; font-size: 11px; font-weight: 700; color: var(--warm); letter-spacing: .04em; margin-top: 6px; }
+    .qnav-legend { display: grid; gap: 4px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+    .qnav-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--line); margin-right: 6px; vertical-align: -1px; }
+    .qnav-legend i.done { background: var(--accent); border-color: var(--accent); }
+    .qnav-legend i.optional { border-style: dashed; }
+    .qnav-legend i.skip { opacity: .35; }
+  }
 </style>
 </head>
 <body>
@@ -139,12 +181,27 @@
     <p class="eyebrow">Kajian Teknologi & AI · Jayapura/Papua</p>
     <h1>Bagaimana warga Jayapura dan Papua menggunakan AI?</h1>
     <p>Sekitar 7–10 menit · 29 pertanyaan · tanpa nama</p>
+    <p class="pic">Penanggung jawab survei: <a class="pic-link" href="https://esternumbre.github.io/" target="_blank" rel="noopener">Ester Numbre</a></p>
   </header>
 
   <div id="formArea">
-    <div class="progress" aria-hidden="true">
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress">
+      <div class="progress-bar" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
       <div class="progress-text" id="progressText">0% terisi</div>
+      <nav class="qnav" id="qnav" aria-label="Navigasi nomor pertanyaan">
+        <div class="qnav-head">
+          <b>Navigasi pertanyaan</b>
+          <div class="progress-bar" aria-hidden="true"><div class="progress-fill" id="navFill"></div></div>
+          <span id="navText">0 dari 0 terisi</span>
+        </div>
+        <div class="qnav-dots" id="navDots"></div>
+        <div class="qnav-legend" aria-hidden="true">
+          <span><i class="done"></i>Sudah dijawab</span>
+          <span><i></i>Belum dijawab</span>
+          <span><i class="optional"></i>Opsional</span>
+          <span><i class="skip"></i>Dilewati otomatis</span>
+        </div>
+      </nav>
     </div>
 
     <form id="surveyForm" novalidate>
@@ -180,7 +237,8 @@
     <button type="button" class="btn" id="shareBtn" style="max-width:280px;margin-top:10px">Bagikan Survei</button>
   </div>
 
-  <footer>Data hanya dipakai untuk keperluan kajian dan tidak dibagikan dalam bentuk identitas pribadi.</footer>
+  <footer>Data hanya dipakai untuk keperluan kajian dan tidak dibagikan dalam bentuk identitas pribadi.<br>
+    Penanggung jawab survei: <a class="pic-link" href="https://esternumbre.github.io/" target="_blank" rel="noopener">Ester Numbre</a></footer>
 </div>
 
 <script src="pertanyaan.js"></script>
@@ -249,6 +307,67 @@ SECTIONS.forEach(sec => {
   });
 });
 
+/* ---------- PIC ---------- */
+document.querySelectorAll(".pic-link").forEach(a => { a.textContent = PIC.nama; a.href = PIC.url; });
+
+/* ---------- Navigasi bulatan nomor ---------- */
+const navDots = document.getElementById("navDots");
+const NAV = {};
+SECTIONS.forEach(sec => {
+  navDots.appendChild(el("span", { class: "sec", text: sec.code + ". " + sec.title, "aria-hidden": "true" }));
+  sec.questions.forEach(q => {
+    const b = el("button", { type: "button", text: String(q.n), "data-q": q.id });
+    b.addEventListener("click", () => {
+      if (b.classList.contains("skip")) return;
+      const card = document.getElementById("card-" + q.id);
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      const first = card.querySelector("input, textarea");
+      if (first) first.focus({ preventScroll: true });
+    });
+    NAV[q.id] = b;
+    navDots.appendChild(b);
+  });
+});
+
+function updateNav(done, total) {
+  ALL_Q.forEach(q => {
+    const b = NAV[q.id];
+    const vis = isVisible(q);
+    const ok = vis && answered(q);
+    const bad = vis && document.getElementById("card-" + q.id).classList.contains("invalid");
+    b.classList.toggle("skip", !vis);
+    b.classList.toggle("done", ok);
+    b.classList.toggle("bad", bad && !ok);
+    b.classList.toggle("optional", vis && !q.required);
+    const status = !vis ? "dilewati otomatis" : ok ? "sudah dijawab" : bad ? "wajib dijawab" : q.required ? "belum dijawab" : "opsional, belum dijawab";
+    b.title = "Pertanyaan " + q.n + ": " + status;
+    b.setAttribute("aria-label", b.title);
+    b.disabled = !vis;
+  });
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById("navFill").style.width = pct + "%";
+  document.getElementById("navText").textContent = done + " dari " + total + " terisi (" + pct + "%)";
+}
+
+// Tandai nomor pertanyaan yang sedang dibaca
+if ("IntersectionObserver" in window) {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      Object.values(NAV).forEach(b => b.classList.remove("current"));
+      const b = NAV[en.target.id.replace("card-", "")];
+      if (b) {
+        b.classList.add("current");
+        // di layar kecil, geser deretan nomor agar nomor aktif terlihat
+        if (navDots.scrollWidth > navDots.clientWidth) {
+          navDots.scrollTo({ left: b.offsetLeft - navDots.clientWidth / 2 + b.offsetWidth / 2, behavior: "smooth" });
+        }
+      }
+    });
+  }, { rootMargin: "-45% 0px -50% 0px" });
+  ALL_Q.forEach(q => io.observe(document.getElementById("card-" + q.id)));
+}
+
 /* ---------- Helpers ---------- */
 const form = document.getElementById("surveyForm");
 const checked = name => Array.from(form.querySelectorAll(`input[name="${name}"]:checked`)).map(i => i.value);
@@ -299,6 +418,7 @@ function updateProgress() {
   const pct = vis.length ? Math.round(done / vis.length * 100) : 0;
   document.getElementById("progressFill").style.width = pct + "%";
   document.getElementById("progressText").textContent = pct + "% terisi (" + done + " dari " + vis.length + " pertanyaan)";
+  updateNav(done, vis.length);
 }
 
 /* ---------- Interaksi ---------- */
@@ -335,6 +455,7 @@ function validate() {
     card.classList.toggle("invalid", !ok);
     if (!ok && !firstBad) firstBad = card;
   });
+  updateProgress(); // perbarui bulatan merah untuk pertanyaan wajib yang terlewat
   if (firstBad) firstBad.scrollIntoView({ behavior: "smooth", block: "center" });
   return !firstBad;
 }
